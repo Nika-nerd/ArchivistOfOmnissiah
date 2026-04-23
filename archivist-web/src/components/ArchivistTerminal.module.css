@@ -1,0 +1,261 @@
+.terminalContainer {
+    background-color: black;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /*overflow: hidden;*/
+    position: relative;
+    font-family: 'Courier New', Courier, monospace;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.bootContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.logoWrapper {
+    animation: logoPulse 2s infinite ease-in-out;
+    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.4));
+}
+
+@keyframes logoPulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+
+.bootLogs {
+    width: 500px;
+    text-align: center;
+}
+
+.fadeIn {
+    animation: fadeInAnim 1.5s ease-out forwards;
+}
+
+@keyframes fadeInAnim {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+        filter: blur(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+.bootScreen {
+    background-color: black;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a30000;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.bootLogs {
+    width: 500px;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+.bootProgressBar {
+    width: 100%;
+    height: 4px;
+    background-color: #1a0000;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.bootProgressBar::after {
+    content: "";
+    position: absolute;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background-color: #ff3333;
+    animation: progressAnim 3s forwards;
+}
+
+@keyframes progressAnim {
+    0% { left: -100%; }
+    50% { left: -30%; }
+    100% { left: 0; }
+}
+
+.blink {
+    animation: blinkAnim 1s infinite;
+    font-weight: bold;
+}
+
+@keyframes blinkAnim {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.binaryBackground {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
+}
+
+.frame {
+    border: 2px solid #a30000;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+    background-color: rgba(5, 0, 0, 0.95);
+    position: relative;
+    z-index: 2;
+}
+
+
+.headerFrame {
+    width: 950px;
+    padding: 30px 20px;
+    margin-bottom: 50px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.title {
+    font-size: 1.6em;
+    margin: 0;
+    color: #ff3333;
+    letter-spacing: 5px;
+    text-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+}
+
+.cultQuote {
+    font-size: 0.75em;
+    color: #a30000;
+    margin-top: 25px;
+    letter-spacing: 2px;
+    opacity: 0.8;
+}
+
+
+.mainContentWrapper {
+    display: flex;
+    gap: 50px;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+
+.chatFrame {
+    width: 600px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.messagesWindow {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    font-size: 0.85em;
+}
+
+.inputArea {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #a30000;
+    background-color: #0d0000;
+}
+
+.terminalInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #ffcccc;
+    outline: none;
+    font-family: inherit;
+}
+
+
+.dataPanelFrame {
+    width: 200px;
+    height: 400px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.dataGroup {
+    margin-bottom: 12px;
+    border-left: 1px solid #a30000;
+    padding-left: 8px;
+}
+
+.groupLabel { font-size: 0.65em; color: #a30000; margin-bottom: 4px; }
+.dataItem { display: flex; justify-content: space-between; font-size: 0.75em; margin-bottom: 2px; }
+.dataLabel { color: #660000; }
+.dataValue { color: #ff3333; }
+
+
+.messagesWindow::-webkit-scrollbar { width: 4px; }
+.messagesWindow::-webkit-scrollbar-thumb { background: #a30000; }
+
+
+.terminalContainer::before {
+    content: " ";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: url('https://raw.githubusercontent.com/PavelDoGreat/Fluid-Engine/master/assets/noise.png');
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 10;
+}
+
+
+.terminalContainer::after {
+    content: " ";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none;
+    z-index: 11;
+}
+
+
+.glitchOverlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 0, 0, 0.05);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 12;
+    transition: opacity 0.2s;
+}
+
+.glitchActive {
+    opacity: 1;
+    animation: glitchAnim 0.2s infinite;
+}
+
+@keyframes glitchAnim {
+    0% { transform: translate(0); clip-path: inset(0 0 0 0); }
+    20% { transform: translate(-5px, 5px); clip-path: inset(10% 0 40% 0); }
+    40% { transform: translate(5px, -5px); clip-path: inset(30% 0 20% 0); }
+    60% { transform: translate(-2px, 2px); clip-path: inset(50% 0 5% 0); }
+    80% { transform: translate(2px, -2px); clip-path: inset(15% 0 60% 0); }
+    100% { transform: translate(0); }
+}

@@ -1,0 +1,15 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16 # Специальный образ Postgres с вектором
+    container_name: archivist_db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: technomancer
+      POSTGRES_PASSWORD: omnissiah_pw
+      POSTGRES_DB: archivist_lore
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
