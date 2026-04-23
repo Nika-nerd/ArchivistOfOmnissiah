@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Archivist.Data;
+using Archivist.Middleware;
 using Archivist.Models;
 using Archivist.Services;
 
@@ -40,6 +41,7 @@ builder.Services.AddHostedService<LoreBackgroundWorker>();
 
 
 var app = builder.Build();
+app.UseMiddleware<ExceptionMiddleware>();
 
 
 if (app.Environment.IsDevelopment())

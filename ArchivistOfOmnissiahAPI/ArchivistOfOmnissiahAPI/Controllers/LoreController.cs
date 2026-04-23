@@ -20,26 +20,19 @@ public class LoreController : ControllerBase
     }
 
     [HttpGet("ask")]
-public async Task<IActionResult> Ask(
-    [FromServices] EmbeddingService embedding, 
-    [FromServices] ChatService chat, 
-    [FromQuery] string question,
-    [FromQuery] string sessionId = "default-session")
-{
-    // 1. ВАЛИДАЦИЯ: Проверяем входящий запрос
-    if (string.IsNullOrWhiteSpace(question) || question.Length < 3)
+    public async Task<IActionResult> Ask(
+        [FromServices] EmbeddingService embedding, 
+        [FromServices] ChatService chat, 
+        [FromQuery] string question,
+        [FromQuery] string sessionId = "default-session")
     {
-        return BadRequest("The query is too brief or empty. Input more data to initiate the machine spirit.");
-    }
+        
+        if (string.IsNullOrWhiteSpace(question) || question.Length < 3)
+        {
+            return BadRequest("The query is too brief or empty.");
+        }
 
-    if (question.Length > 2000)
-    {
-        return BadRequest("The data-stream is too dense. Condense your query to under 2000 units.");
-    }
-
-    try 
-    {
-        // 2. ОЧИСТКА СТАРОЙ ИСТОРИИ 
+        
         var sessionMessagesCount = await _context.ChatMessages
             .Where(m => m.SessionId == sessionId)
             .CountAsync();
@@ -55,34 +48,19 @@ public async Task<IActionResult> Ask(
             await _context.SaveChangesAsync();
         }
 
-        // 3. RAG: Поиск релевантного лора в базе данных
         var vector = await embedding.GetVectorAsync(question);
 
-        // Ищем 3 самых похожих фрагмента по косинусному расстоянию
         var loreChunks = await _context.LoreEntries
             .OrderBy(e => e.Embedding!.CosineDistance(vector))
             .Take(3)
             .Select(e => e.Content)
             .ToListAsync();
 
-        // Объединяем найденный лор в одну строку
         var context = string.Join("\n\n", loreChunks);
-
-        // 4. ГЕНЕРАЦИЯ: Отправляем контекст и вопрос в ChatService
         var answer = await chat.AskQuestionAsync(context, question, sessionId);
 
         return Ok(new { sessionId, question, answer });
     }
-    catch (Exception ex)
-    {
-        // 5. ОБРАБОТКА ОШИБОК
-        return StatusCode(500, new 
-        { 
-            error = "Machine Spirit Disturbance", 
-            message = "A critical failure occurred. Log entry: " + ex.Message 
-        });
-    }
-}
 
     [HttpPost("ingest-wiki")]
     public async Task<IActionResult> IngestWiki(
