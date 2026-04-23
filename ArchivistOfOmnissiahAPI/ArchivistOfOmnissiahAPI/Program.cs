@@ -34,6 +34,11 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
+builder.Services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(100));
+builder.Services.AddHostedService<LoreBackgroundWorker>();
+
+
 var app = builder.Build();
 
 

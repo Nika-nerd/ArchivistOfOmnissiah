@@ -86,51 +86,42 @@ public async Task<IActionResult> Ask(
 
     [HttpPost("ingest-wiki")]
     public async Task<IActionResult> IngestWiki(
-        [FromServices] WikiService wiki,
-        [FromServices] EmbeddingService embedding, 
-        [FromQuery] string topic)
+        [FromQuery] string topic,
+        [FromServices] IBackgroundTaskQueue queue,
+        [FromServices] IServiceScopeFactory scopeFactory)
     {
-        var chunks = await wiki.GetArticleContentAsync(topic);
-        if (!chunks.Any()) return NotFound("Archives do not contain data on this subject.");
-
-        int addedCount = 0;
-        foreach (var chunk in chunks)
-        {
-            var hash = wiki.ComputeHash(chunk);
-            
-            bool exsists = await  _context.LoreEntries.AnyAsync(e => e.ContentHash == hash);
-
-            if (!exsists)
-            {
-                var vector = await embedding.GetVectorAsync(chunk);
-
-                _context.LoreEntries.Add(new LoreEntry
-                {
-                    Content = chunk,
-                    ContentHash = hash,
-
-                    Source = $"Wikipedia: {topic}",
-                    Embedding = vector
-                });
-                addedCount++;
-            }
-        }
-
-        var tasks = chunks.Select(async chunk => 
-        {
-            var vector = await embedding.GetVectorAsync(chunk);
-            return new LoreEntry
-            {
-                Content = chunk,
-                Source = $"Wikipedia: {topic}",
-                Embedding = vector
-            };
-        });
+        
+        if (string.IsNullOrWhiteSpace(topic)) return BadRequest("Topic is empty.");
 
         
-        await _context.SaveChangesAsync();
+        await queue.QueueBackgroundWorkItemAsync(async token =>
+        {
+            using var scope = scopeFactory.CreateScope();
+            var wiki = scope.ServiceProvider.GetRequiredService<WikiService>();
+            var embedding = scope.ServiceProvider.GetRequiredService<EmbeddingService>();
+            var db = scope.ServiceProvider.GetRequiredService<ArchivistDbContext>();
 
-        return Ok($"Data-stacks updated. Added {addedCount} new fragments. Skipped {chunks.Count - addedCount} duplicates.");
+            var chunks = await wiki.GetArticleContentAsync(topic);
+        
+            foreach (var chunk in chunks)
+            {
+                var hash = wiki.ComputeHash(chunk);
+                if (!await db.LoreEntries.AnyAsync(e => e.ContentHash == hash, token))
+                {
+                    var vector = await embedding.GetVectorAsync(chunk);
+                    db.LoreEntries.Add(new LoreEntry
+                    {
+                        Content = chunk,
+                        ContentHash = hash,
+                        Source = $"Wikipedia: {topic}",
+                        Embedding = vector
+                    });
+                }
+            }
+            await db.SaveChangesAsync(token);
+        });
+
+        return Accepted(new { message = $"Task initiated. The archives are being updated with data on: {topic}" });
     }
 
     [HttpDelete("clear-all")]
